@@ -1,9 +1,16 @@
 import "./MovieCard.css"
+import { Detail } from "./routes/detail"
+import { useNavigate } from "react-router-dom"
 
 // This component displays a single movie card
 function MovieCard({ movie }) {
+    const navigate = useNavigate()
+
+    const handleClick = () => {
+      navigate(`/movies/${movie.id}`)
+    }
   return (
-    <div className="movie-card">
+    <div className="movie-card" onClick={handleClick}>
       {/* Movie poster placeholder */}
       <div className="movie-poster">
         <span>{movie.title.charAt(0)}</span>

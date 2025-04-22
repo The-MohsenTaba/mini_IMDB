@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import MovieCard from "../MovieCard"
 import { Route, Router, Routes } from "react-router-dom"
+import { Detail } from "./detail"
 
 function Movies() {
   const [movies, setMovies] = useState([])
@@ -164,11 +165,6 @@ return (
       </div>
     )}
   </div>
-  // <Router>
-  //   <Routes>
-  //     <Route path = "/main" element={<main/>}/>
-  //   </Routes>
-  // </Router>
 )
 }
 
