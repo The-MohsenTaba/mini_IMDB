@@ -1,10 +1,8 @@
-"use client"
 import { useState, useEffect } from "react"
-import "./App.css"
-import MovieCard from "./MovieCard"
+import MovieCard from "../MovieCard"
 import { Route, Router, Routes } from "react-router-dom"
 
-function App() {
+function Movies() {
   const [movies, setMovies] = useState([])
   const [filteredMovies, setFilteredMovies] = useState([])
   const [loading, setLoading] = useState(true)
@@ -176,4 +174,4 @@ return (
 
 
 
-export default App
+export default Movies
