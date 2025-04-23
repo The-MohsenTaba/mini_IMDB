@@ -10,6 +10,8 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework import filters
 from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated,AllowAny
 
 # Create your views here.
 """class MoviesView(generics.ListCreateAPIView):
@@ -106,13 +108,17 @@ class CustomeTokenObtainPairView(TokenObtainPairView):
         except:
             return Response({'success':False})
         
-
+@api_view(['POST'])
+@permission_classes([AllowAny])
 def logout(request):
+    print("meow")
     try:
         res=Response()
         res.data={'success':True}
         res.delete_cookie('access_token',path="/",samesite="None")
         res.delete_cookie('refresh_token',path='/',samesite="None")
+        print(res)
         return res
+        
     except:
         return Response({'success':False})

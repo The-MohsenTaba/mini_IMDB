@@ -2,6 +2,8 @@ import { useState, useEffect } from "react"
 import MovieCard from "../MovieCard"
 import { Route, Router, Routes } from "react-router-dom"
 import { Detail } from "./detail"
+import { useNavigate } from "react-router-dom"
+import { logout } from "../endpoints/api"
 
 function Movies() {
   const [movies, setMovies] = useState([])
@@ -12,12 +14,19 @@ function Movies() {
   const [sortBy, setSortBy] = useState("title")
   const [sortDirection, setSortDirection] = useState("asc")
 
+  const nav = useNavigate();
+
   useEffect(() => {
     const fetchMovies = async () => {
       try {
         setLoading(true)
         // Use your movies endpoint directly
-        const response = await fetch('http://127.0.0.1:8000/movies/')
+        const response = await fetch('http://127.0.0.1:8000/movies/', {
+          credentials: 'include',  // This is crucial!
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
         
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`)
@@ -111,9 +120,20 @@ if (loading) {
 if (error) {
   return <div className="error">{error}</div>
 }
-
+const handleLogout = async()=>{
+  try{
+    console.log("meow")
+    const success = await logout();
+    if (success){
+      nav("../login/")
+    }
+  }catch(error){
+    console.error("logout Error : ",error)
+  }
+}
 return (
   <div className="app">
+    <button onClick={handleLogout}> LogOut </button>
     <header>
       <h1>Mini IMDB</h1>
     </header>

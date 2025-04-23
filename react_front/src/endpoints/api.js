@@ -1,8 +1,11 @@
 import axios from 'axios'
 import { useState } from 'react'
-const BASE_URL = "http://localhost:8000/"
+const BASE_URL = "http://127.0.0.1:8000/"
 const LOGIN_URL = "http://localhost:8000/api/token/"
-const REFRESH_URL = "${LOGIN_URL}refresh/" 
+const REFRESH_URL = `${LOGIN_URL}refresh/`
+const LOGOUT_URL = "http://127.0.0.1:8000/logout/"
+
+axios.defaults.withCredentials = true;
 
 export const login = async (username , password)=> {
 
@@ -49,3 +52,26 @@ export const post_vote = async(rating)=>{
         ))
     }
 }
+
+export const logout = async () => {
+    try {
+        // First make a GET request to ensure cookies are set
+        await axios.get('http://localhost:8000/', { withCredentials: true });
+        
+        // Then make the logout request
+        const response = await axios.post(
+            'http://localhost:8000/logout/',
+            {},
+            {
+                withCredentials: true,
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            }
+        );
+        return response.data.success;
+    } catch (error) {
+        console.error('Logout error:', error);
+        return false;
+    }
+};
