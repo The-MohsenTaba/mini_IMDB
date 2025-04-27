@@ -75,16 +75,16 @@ SIMPLE_JWT = {
     'AUTH_COOKIE': 'access_token',  # Cookie name for the access token
     'AUTH_COOKIE_REFRESH': 'refresh_token',  # Cookie name for the refresh token
     'AUTH_COOKIE_DOMAIN': None,
-    'AUTH_COOKIE_SECURE': False,  # Set to True if using HTTPS
+    'AUTH_COOKIE_SECURE': True,  # Set to True if using HTTPS
     'AUTH_COOKIE_HTTP_ONLY': True,  # Make the cookie HTTP only
     'AUTH_COOKIE_PATH': '/',  # Root path for the cookie
     'AUTH_COOKIE_SAMESITE': 'None',  # Adjust according to your needs
 
 }
 
-CSRF_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = True
 CSRF_COOKIE_SAMESITE = 'None'
-SESSION_COOKIE_SECURE = False
+SESSION_COOKIE_SECURE = True
 SESSION_COOKIE_SAMESITE = 'None'
 
 

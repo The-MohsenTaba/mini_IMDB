@@ -1,17 +1,19 @@
 import { VStack,FormControl,FormLabel,Input, Button } from '@chakra-ui/react';
 
 import { useState } from 'react';
-import { login } from '../endpoints/api';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/useAuth';
+const nav= useNavigate
 
 const Login = () => {
 
     const [username,setUsername] = useState('')
     const [password,setPassword] = useState('')
+    const {loginUser} = useAuth();
 
     const handleLogin = ()=> {
 
-        login(username,password)
-
+        loginUser(username,password)
     }
 
     return (

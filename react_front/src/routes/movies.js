@@ -4,6 +4,8 @@ import { Route, Router, Routes } from "react-router-dom"
 import { Detail } from "./detail"
 import { useNavigate } from "react-router-dom"
 import { logout } from "../endpoints/api"
+import { useAuth } from "../contexts/useAuth"
+import { Button } from "@chakra-ui/react"
 
 function Movies() {
   const [movies, setMovies] = useState([])
@@ -16,6 +18,8 @@ function Movies() {
 
   const nav = useNavigate();
 
+  const auth=useAuth();
+  const curruser=auth.user
   useEffect(() => {
     const fetchMovies = async () => {
       try {
@@ -131,9 +135,39 @@ const handleLogout = async()=>{
     console.error("logout Error : ",error)
   }
 }
+
+
+const handleLogin = async()=>{
+  nav("../login/")
+}
+const handleMyRatings = async()=>{
+  nav("../my-ratings/")
+}
+
+
+function Login_Button(user){
+  console.log("user: ",user.user)
+  if(user.user != "" ){
+    return( 
+      <div>
+
+        <div>
+          <h3>{user.user}</h3>
+          <Button onClick={handleLogout}>Log out</Button>
+        </div>
+        <Button onClick={handleMyRatings}>My Ratings</Button>
+
+      </div>
+      )
+  }
+  else{
+    return <Button onClick= {handleLogin} >Log In</Button>;
+  }
+};
+
 return (
   <div className="app">
-    <button onClick={handleLogout}> LogOut </button>
+    <Login_Button user={curruser}/>
     <header>
       <h1>Mini IMDB</h1>
     </header>

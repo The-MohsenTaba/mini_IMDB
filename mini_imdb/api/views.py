@@ -1,7 +1,8 @@
 from django.shortcuts import render
+from django.http import JsonResponse
 from rest_framework import generics
-from .serializers import MovieSerializer,UserSerializer,VoteSerializer
-from .models import Movie
+from .serializers import MovieSerializer,UserSerializer,VoteSerializer,MyVoteSerializer,UserRegister
+from .models import Movie,Vote,User
 from rest_framework import permissions
 from rest_framework import viewsets
 from rest_framework.decorators import action
@@ -13,12 +14,6 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated,AllowAny
 
-# Create your views here.
-"""class MoviesView(generics.ListCreateAPIView):
-    serializer_class=MovieSerializer
-    queryset = Movie.objects.all()
-    permission_classes=[permissions.IsAdminUser,permissions.IsAuthenticated]
-"""
 
 class MovieViewsets(viewsets.ModelViewSet):
     queryset = Movie.objects.all()
@@ -98,10 +93,10 @@ class CustomeTokenObtainPairView(TokenObtainPairView):
             res.set_cookie(
                 key="refresh_token",
                 value= str(refresh_token),
-                path='/',
                 httponly=True,
+                secure=True,
                 samesite="None",
-                secure=True
+                path='/'
             )
             res.data.update(tokens)
             return res
@@ -111,7 +106,6 @@ class CustomeTokenObtainPairView(TokenObtainPairView):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def logout(request):
-    print("meow")
     try:
         res=Response()
         res.data={'success':True}
@@ -122,3 +116,37 @@ def logout(request):
         
     except:
         return Response({'success':False})
+    
+
+class MyRatings(generics.ListAPIView):
+    serializer_class=MyVoteSerializer
+    # permission_classes=[IsAuthenticated]
+    def get_queryset(self):
+        current_user=self.request.user
+        return Vote.objects.filter(user=current_user)
+    
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def is_logged_in(request):
+    serializer = UserSerializer(request.user, many=False)
+    return Response(serializer.data)
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def register_user(request):
+    serializer=UserRegister(data=request.data,context={"request":request})
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors)
+    # newuser.username=request.username
+    # if (request.password == request.confirm_password):
+    #     newuser.password=request.password
+    # newuser.save()
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def all_users(request):
+    users=User.objects.all()
+    serializer=UserSerializer(users,many=True)
+    return Response(serializer.data)
