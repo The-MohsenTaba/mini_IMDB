@@ -1,6 +1,60 @@
 from rest_framework import serializers
 from .models import*
 
+# NoSQL serializers 
+
+
+class MongoPersonSerializer(serializers.Serializer):
+    id = serializers.CharField(read_only= True)
+    first_name = serializers.CharField()
+    last_name = serializers.CharField()
+
+    def create(self, validated_data):
+        return MongoPerson(**validated_data).save()
+    
+    def update(self, instance, validated_data):
+        for attr , value in validated_data.items():
+            setattr(instance,attr,value)
+        instance.save()
+        return instance
+    
+    def to_representation(self, instance):
+        return {
+            'id':str(instance.id),
+            'first_name': instance.first_name,
+            'last_name': instance.last_name
+        }
+
+
+class MongoMovieSerializer(serializers.Serializer):
+    id = serializers.CharField(read_only=True)
+    title = serializers.CharField()
+    year = serializers.IntegerField()
+    average_rating=serializers.FloatField()
+
+
+    def create(self, validated_data):
+        return MongoMovie(**validated_data).save()
+    
+    def update(self, instance, validated_data):
+        for attr , value in validated_data.items():
+            setattr(instance,attr,value)
+        instance.save()
+        return instance
+    
+    def to_representation(self, instance):
+        return {
+            'id': str(instance.id),
+            'title' : instance.title,
+            'year' : instance.year,
+            'average_rating' : instance.average_rating
+        }
+
+
+
+
+
+# SQL serializers
 
 class VoteSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())

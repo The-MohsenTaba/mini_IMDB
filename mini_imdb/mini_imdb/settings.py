@@ -171,3 +171,10 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ]
 }
+
+from mongoengine import connect
+
+connect(
+    db="mini_IMDB",
+    host="mongodb://localhost:27017/mini_IMDB"
+)

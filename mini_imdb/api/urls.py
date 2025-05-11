@@ -9,7 +9,8 @@ urlpatterns = [
     path("my-ratings/",views.MyRatings.as_view()),
     path("authenticated/",views.is_logged_in),
     path("sign-up/",views.register_user),
-    path("users/",views.all_users)
+    path("users/",views.all_users),
+    path("meow/", views.mongo_person_view)
 ]
 
 urlpatterns+=router.urls

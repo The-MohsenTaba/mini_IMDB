@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from rest_framework import generics
-from .serializers import MovieSerializer,UserSerializer,VoteSerializer,MyVoteSerializer,UserRegister
+from .serializers import MovieSerializer,UserSerializer,VoteSerializer,MyVoteSerializer,UserRegister,MongoPersonSerializer
 from .models import Movie,Vote,User
 from rest_framework import permissions
 from rest_framework import viewsets
@@ -13,6 +13,29 @@ from rest_framework import filters
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated,AllowAny
+from django.http import JsonResponse
+from .models import MongoMovie
+import json
+
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def list_movies(request):
+    movies = Movie.objects.all()
+    data = [{"title": m.title, "year": m.year, "rating": m.average_rating} for m in movies]
+    return JsonResponse(data, safe=False)
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def mongo_person_view(request):
+    if request.method == "POST":
+        serializer = MongoPersonSerializer(data=request.data ,context={"request":request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors)
+
 
 
 class MovieViewsets(viewsets.ModelViewSet):
