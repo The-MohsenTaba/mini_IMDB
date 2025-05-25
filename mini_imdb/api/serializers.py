@@ -3,7 +3,6 @@ from .models import*
 
 # NoSQL serializers 
 
-
 class MongoPersonSerializer(serializers.Serializer):
     id = serializers.CharField(read_only= True)
     first_name = serializers.CharField()
@@ -26,15 +25,19 @@ class MongoPersonSerializer(serializers.Serializer):
         }
 
 
-class MongoMovieSerializer(serializers.Serializer):
-    id = serializers.CharField(read_only=True)
-    title = serializers.CharField()
-    year = serializers.IntegerField()
-    average_rating=serializers.FloatField()
-
+class MongoRatingSerializer(serializers.Serializer):
+    user = serializers.HiddenField(default = serializers.CurrentUserDefault())
+    movie = serializers.CharField()
+    rating = serializers.FloatField( min_value = 0 , max_value =5)
 
     def create(self, validated_data):
-        return MongoMovie(**validated_data).save()
+        movie_name = validated_data.pop("movie")
+        validated_data['movie'] = MongoMovie.objects.get(title = movie_name)
+        user_name = validated_data.pop("user")
+        validated_data['user']=str(user_name)
+        rate= MongoVote(**validated_data)
+        rate.save()
+        return rate
     
     def update(self, instance, validated_data):
         for attr , value in validated_data.items():
@@ -44,10 +47,70 @@ class MongoMovieSerializer(serializers.Serializer):
     
     def to_representation(self, instance):
         return {
+            'movie' :{
+             'title': instance.movie.title,
+             'year': instance.movie.year,
+            },
+                
+            'your rating' : instance.rating,
+        }
+
+
+# since drf ui does not support list and cict inputs , you can only add movies via api services
+class MongoMovieSerializer(serializers.Serializer):
+    id = serializers.CharField(read_only=True)
+    title = serializers.CharField()
+    year = serializers.IntegerField()
+    average_rating=serializers.FloatField(read_only = True)
+
+    genere=serializers.ChoiceField(choices=["Action",
+                                                    "Comedy",
+                                                    "Drama",
+                                                    "Horror",
+                                                    "Romance",
+                                                    "Biography",
+                                                    "Sci-fi",
+                                                    "Thriller"])
+    
+    rating_count = serializers.IntegerField(read_only=True)
+    directors = serializers.ListField(
+        child=serializers.CharField(),write_only = True
+    )
+    actors = serializers.ListField(
+        child = serializers.CharField(),write_only = True
+    )
+
+
+    def create(self, validated_data):
+        # delete  list of string ids we recieved from our data to variables
+        directors_ids = validated_data.pop('directors')
+        actors_ids = validated_data.pop('actors')
+        # store documents related to those ids in our data
+        validated_data['directors'] = [MongoPerson.objects.get(id=did) for did in directors_ids]
+        validated_data['actors'] = [MongoPerson.objects.get(id=aid) for aid in actors_ids]
+        return MongoMovie(**validated_data).save()
+    
+    def update(self, instance, validated_data):
+        for attr , value in validated_data.items():
+             # if the updated fied was director or actors , we need to refrence whole document for them 
+             if attr in ['directors', 'actors']:
+                refs = [MongoPerson.objects.get(id=i) for i in value]
+                setattr(instance, attr, refs)
+             else:
+                setattr(instance, attr, value)
+        instance.save()
+        return instance
+    
+    def to_representation(self, instance):
+        return {
             'id': str(instance.id),
             'title' : instance.title,
             'year' : instance.year,
-            'average_rating' : instance.average_rating
+            'average_rating' : instance.average_rating,
+            'rating_count' : instance.rating_count,
+            'genere' : str(instance.genere),
+            'directors': [ f"{p.first_name} {p.last_name}"for p in instance.directors],
+             'actors': [ f"{p.first_name} {p.last_name}"for p in instance.actors],
         }
 
 

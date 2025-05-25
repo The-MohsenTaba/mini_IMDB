@@ -10,7 +10,10 @@ urlpatterns = [
     path("authenticated/",views.is_logged_in),
     path("sign-up/",views.register_user),
     path("users/",views.all_users),
-    path("meow/", views.mongo_person_view)
+    path("mongo/persons/", views.mongo_person_view),
+    path("mongo/movies/", views.MongoMovieClass.as_view()),
+    path("mongo/rating/", views.mongo_rating_view),
+
 ]
 
 urlpatterns+=router.urls

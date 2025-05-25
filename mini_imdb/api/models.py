@@ -24,30 +24,30 @@ class GenreEnum(Enum):
 class MongoMovie(Document):
     title = StringField(required=True, max_length=100)
     year = IntField()
-    genre = EnumField(GenreEnum)
-    total_ratings = IntField(default =0)
+    genere = EnumField(GenreEnum)
+    rating_count = IntField(default =0)
     average_rating = FloatField(default =0)
     directors = ListField(ReferenceField(MongoPerson))
     actors = ListField(ReferenceField(MongoPerson))
 
     def __str__(self):
-        return f"{self.title} ({self.year}) - {self.rating}"
+        return f"{self.title} ({self.year}) - {self.average_rating}"
     
     def update_rating_stats(self):
         ratings = MongoVote.objects(movie = self)
         if ratings:
             count = ratings.count()
-            rates = sum([float(r.rating) for r in rates])
-            self.total_ratings = count
+            rates = sum([float(r.rating) for r in ratings])
+            self.rating_count = count
             self.average_rating = round(rates/count,1)
 
         else:
-            self.total_ratings= 0
+            self.rating_count= 0
             self.average_rating = 0
         self.save()
 
 class MongoVote(Document):
-    user_id = StringField(required = True , max_length=50)
+    user = StringField(required = True , max_length=50)
     movie = ReferenceField(MongoMovie, required = True)
     rating = FloatField(precision = 1 , min_value=0 , max_value= 5 , required = True)
 

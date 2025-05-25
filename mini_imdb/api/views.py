@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from rest_framework import generics
-from .serializers import MovieSerializer,UserSerializer,VoteSerializer,MyVoteSerializer,UserRegister,MongoPersonSerializer
+from .serializers import MovieSerializer,UserSerializer,VoteSerializer,MyVoteSerializer,UserRegister,MongoPersonSerializer,MongoMovieSerializer , MongoRatingSerializer
 from .models import Movie,Vote,User
 from rest_framework import permissions
 from rest_framework import viewsets
@@ -17,14 +17,32 @@ from django.http import JsonResponse
 from .models import MongoMovie
 import json
 
+class MongoMovieClass(generics.ListCreateAPIView):
+    serializer_class = MongoMovieSerializer
+    permission_classes= [AllowAny]
+
+    def get_queryset(self):
+        return MongoMovie.objects.all()
+    
+    def get(self,request , *args, **kwargs):
+        return self.list(request , *args, **kwargs)
+    
+    def post (self , request , *args, **kwargs):
+        return self.create(request , *args, **kwargs)
 
 
-@api_view(["GET"])
+
+@api_view(["POST"])
 @permission_classes([AllowAny])
-def list_movies(request):
-    movies = Movie.objects.all()
-    data = [{"title": m.title, "year": m.year, "rating": m.average_rating} for m in movies]
-    return JsonResponse(data, safe=False)
+def mongo_rating_view(request):
+    if request.method == "POST":
+        serializer = MongoRatingSerializer(data=request.data ,context={"request":request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors)
+
+
 
 @api_view(["POST"])
 @permission_classes([AllowAny])
