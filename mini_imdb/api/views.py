@@ -17,45 +17,7 @@ from django.http import JsonResponse
 from .models import MongoMovie
 import json
 
-class MongoMovieClass(generics.ListCreateAPIView):
-    serializer_class = MongoMovieSerializer
-    permission_classes= [AllowAny]
-
-    def get_queryset(self):
-        return MongoMovie.objects.all()
-    
-    def get(self,request , *args, **kwargs):
-        return self.list(request , *args, **kwargs)
-    
-    def post (self , request , *args, **kwargs):
-        return self.create(request , *args, **kwargs)
-
-
-
-@api_view(["POST"])
-@permission_classes([AllowAny])
-def mongo_rating_view(request):
-    if request.method == "POST":
-        serializer = MongoRatingSerializer(data=request.data ,context={"request":request})
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors)
-
-
-
-@api_view(["POST"])
-@permission_classes([AllowAny])
-def mongo_person_view(request):
-    if request.method == "POST":
-        serializer = MongoPersonSerializer(data=request.data ,context={"request":request})
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors)
-
-
-
+# SQLite Views
 class MovieViewsets(viewsets.ModelViewSet):
     queryset = Movie.objects.all()
     serializer_class = MovieSerializer
@@ -64,7 +26,7 @@ class MovieViewsets(viewsets.ModelViewSet):
     ordering_fields=['average_rating']
 
     def get_permissions(self):
-        if self.action in [ 'update_vote']:  # Changed to match action names
+        if self.action in [ 'update_vote','vote']:  # Changed to match action names
             self.permission_classes = [permissions.IsAuthenticated]
         else:
             self.permission_classes = [permissions.AllowAny]
@@ -160,11 +122,16 @@ def logout(request):
     
 
 class MyRatings(generics.ListAPIView):
-    serializer_class=MyVoteSerializer
-    # permission_classes=[IsAuthenticated]
+    serializer_class=MyVoteSerializerpermission_classes=[IsAuthenticated]
     def get_queryset(self):
         current_user=self.request.user
         return Vote.objects.filter(user=current_user)
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        if not queryset.exists():
+            return Response({"message": "No vote has been submitted!"})
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
     
 @api_view(['GET'])
 @permission_classes([AllowAny])
@@ -180,14 +147,51 @@ def register_user(request):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors)
-    # newuser.username=request.username
-    # if (request.password == request.confirm_password):
-    #     newuser.password=request.password
-    # newuser.save()
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def all_users(request):
     users=User.objects.all()
     serializer=UserSerializer(users,many=True)
+
+
+
+# mongoDB Views 
+class MongoMovieClass(generics.ListCreateAPIView):
+    serializer_class = MongoMovieSerializer
+    permission_classes= [AllowAny]
+
+    def get_queryset(self):
+        return MongoMovie.objects.all()
+    
+    def get(self,request , *args, **kwargs):
+        return self.list(request , *args, **kwargs)
+    
+    def post (self , request , *args, **kwargs):
+        return self.create(request , *args, **kwargs)
+
+
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def mongo_rating_view(request):
+    if request.method == "POST":
+        serializer = MongoRatingSerializer(data=request.data ,context={"request":request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors)
+
+
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def mongo_person_view(request):
+    if request.method == "POST":
+        serializer = MongoPersonSerializer(data=request.data ,context={"request":request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors)
+
     return Response(serializer.data)

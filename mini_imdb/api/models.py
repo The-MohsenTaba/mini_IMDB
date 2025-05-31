@@ -9,7 +9,6 @@ from django.core.exceptions import ValidationError
 class Person(models.Model):
     first_name = models.CharField(null=False,max_length=50)
     last_name = models.CharField(null=False,max_length=50)
-
     def __str__(self):
         return self.first_name + " " + self. last_name
     
@@ -33,7 +32,7 @@ class Movie (models.Model):
     actors = models.ManyToManyField(Person,related_name="actors")
 
     def clean(self):
-        if self.genere not in self.GenereChoices.choices:
+        if self.genere not in self.GenereChoices.values:
             raise ValidationError("invalid genere!")
         
         if ((self.average_rating > 10) or (self.average_rating<0)) :
