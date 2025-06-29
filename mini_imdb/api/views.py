@@ -51,8 +51,8 @@ class MovieViewsets(viewsets.ModelViewSet):
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-    @action(detail=True, methods=['get','put', 'patch'], url_path='update-vote')
-    def update_vote(self, request, pk=None):
+    @action(detail=True, methods=['get','put', 'patch'], url_name='update-vote')
+    def update_vote(self, request, pk=None,url_path="/update_rating"):
         if request.method == 'GET':
             return Response({"detail": "Update your vote via PUT"})
         movie = self.get_object()
@@ -153,6 +153,7 @@ def register_user(request):
 def all_users(request):
     users=User.objects.all()
     serializer=UserSerializer(users,many=True)
+    return Response(serializer.data)
 
 
 
