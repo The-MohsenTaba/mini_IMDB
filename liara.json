@@ -1,5 +1,8 @@
 {
   "django": {
-    "settingsFile": "./mini_imdb/mini_imdb/settings.py"
+    "settingsFile": "./mini_imdb/mini_imdb/settings.py",
+    "mirror": false,
+    "pythonVersion": "3.11.4",
+    "compileMessages": true
   }
 }
